@@ -1,0 +1,321 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script>function neighbourhoodHighlight(params) {
+  // console.log("in nieghbourhoodhighlight");
+  allNodes = nodes.get({ returnType: "Object" });
+  // originalNodes = JSON.parse(JSON.stringify(allNodes));
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    highlightActive = true;
+    var i, j;
+    var selectedNode = params.nodes[0];
+    var degrees = 2;
+
+    // mark all nodes as hard to read.
+    for (let nodeId in allNodes) {
+      // nodeColors[nodeId] = allNodes[nodeId].color;
+      allNodes[nodeId].color = "rgba(200,200,200,0.5)";
+      if (allNodes[nodeId].hiddenLabel === undefined) {
+        allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+    var connectedNodes = network.getConnectedNodes(selectedNode);
+    var allConnectedNodes = [];
+
+    // get the second degree nodes
+    for (i = 1; i < degrees; i++) {
+      for (j = 0; j < connectedNodes.length; j++) {
+        allConnectedNodes = allConnectedNodes.concat(
+          network.getConnectedNodes(connectedNodes[j])
+        );
+      }
+    }
+
+    // all second degree nodes get a different color and their label back
+    for (i = 0; i < allConnectedNodes.length; i++) {
+      // allNodes[allConnectedNodes[i]].color = "pink";
+      allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
+      if (allNodes[allConnectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[allConnectedNodes[i]].label =
+          allNodes[allConnectedNodes[i]].hiddenLabel;
+        allNodes[allConnectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // all first degree nodes get their own color and their label back
+    for (i = 0; i < connectedNodes.length; i++) {
+      // allNodes[connectedNodes[i]].color = undefined;
+      allNodes[connectedNodes[i]].color = nodeColors[connectedNodes[i]];
+      if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[connectedNodes[i]].label =
+          allNodes[connectedNodes[i]].hiddenLabel;
+        allNodes[connectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // the main node gets its own color and its label back.
+    // allNodes[selectedNode].color = undefined;
+    allNodes[selectedNode].color = nodeColors[selectedNode];
+    if (allNodes[selectedNode].hiddenLabel !== undefined) {
+      allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
+      allNodes[selectedNode].hiddenLabel = undefined;
+    }
+  } else if (highlightActive === true) {
+    // console.log("highlightActive was true");
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      // allNodes[nodeId].color = "purple";
+      allNodes[nodeId].color = nodeColors[nodeId];
+      // delete allNodes[nodeId].color;
+      if (allNodes[nodeId].hiddenLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
+        allNodes[nodeId].hiddenLabel = undefined;
+      }
+    }
+    highlightActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    // console.log("Nothing was selected");
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        // allNodes[nodeId].color = {};
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function filterHighlight(params) {
+  allNodes = nodes.get({ returnType: "Object" });
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    filterActive = true;
+    let selectedNodes = params.nodes;
+
+    // hiding all nodes and saving the label
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = true;
+      if (allNodes[nodeId].savedLabel === undefined) {
+        allNodes[nodeId].savedLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+
+    for (let i=0; i < selectedNodes.length; i++) {
+      allNodes[selectedNodes[i]].hidden = false;
+      if (allNodes[selectedNodes[i]].savedLabel !== undefined) {
+        allNodes[selectedNodes[i]].label = allNodes[selectedNodes[i]].savedLabel;
+        allNodes[selectedNodes[i]].savedLabel = undefined;
+      }
+    }
+
+  } else if (filterActive === true) {
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = false;
+      if (allNodes[nodeId].savedLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].savedLabel;
+        allNodes[nodeId].savedLabel = undefined;
+      }
+    }
+    filterActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function selectNode(nodes) {
+  network.selectNodes(nodes);
+  neighbourhoodHighlight({ nodes: nodes });
+  return nodes;
+}
+
+function selectNodes(nodes) {
+  network.selectNodes(nodes);
+  filterHighlight({nodes: nodes});
+  return nodes;
+}
+
+function highlightFilter(filter) {
+  let selectedNodes = []
+  let selectedProp = filter['property']
+  if (filter['item'] === 'node') {
+    let allNodes = nodes.get({ returnType: "Object" });
+    for (let nodeId in allNodes) {
+      if (allNodes[nodeId][selectedProp] && filter['value'].includes((allNodes[nodeId][selectedProp]).toString())) {
+        selectedNodes.push(nodeId)
+      }
+    }
+  }
+  else if (filter['item'] === 'edge'){
+    let allEdges = edges.get({returnType: 'object'});
+    // check if the selected property exists for selected edge and select the nodes connected to the edge
+    for (let edge in allEdges) {
+      if (allEdges[edge][selectedProp] && filter['value'].includes((allEdges[edge][selectedProp]).toString())) {
+        selectedNodes.push(allEdges[edge]['from'])
+        selectedNodes.push(allEdges[edge]['to'])
+      }
+    }
+  }
+  selectNodes(selectedNodes)
+}</script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+            
+            
+            
+            
+            
+
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"group": "Article", "id": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "shape": "dot", "title": "article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a\nURI: http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a\nheadline: Two bombs explode in Algerian capital near government and U.N. buildings .\nAlgeria blames group linked to al Qaeda .\nOfficial death toll is 26, but some sources say as high as 76 .\nU.N. officials say five of its staff killed and 14 missing ."}, {"group": "Place", "id": "http://example.org/kg/Tunisia_GPE", "label": "Tunisia", "shape": "dot", "title": "Tunisia\nURI: http://example.org/kg/Tunisia_GPE\nlabel: Tunisia"}, {"group": "Person", "id": "http://example.org/kg/Paula_Newton_PERSON", "label": "Paula Newton", "shape": "dot", "title": "Paula Newton\nURI: http://example.org/kg/Paula_Newton_PERSON\nlabel: Paula Newton"}, {"group": "UnknownType", "id": "http://schema.org/Person", "label": "Person", "shape": "dot", "title": "Person\nURI: http://schema.org/Person"}, {"group": "Article", "id": "http://example.org/kg/article_56d7d67bb0fc32ee71cc006b915244776d883661", "label": "article_56d7d67bb0fc32ee71cc006b915244776d883661", "shape": "dot", "title": "article_56d7d67bb0fc32ee71cc006b915244776d883661\nURI: http://example.org/kg/article_56d7d67bb0fc32ee71cc006b915244776d883661\nheadline: Navarrette: Opponents see Hispanic immigrants as weakening U.S. identity .\nOne town demanded all library books be in English, Navarrette says .\nHispanics the latest to find themselves at center of culture war ."}, {"group": "UnknownType", "id": "http://schema.org/Article", "label": "Article", "shape": "dot", "title": "Article\nURI: http://schema.org/Article"}, {"group": "Person", "id": "http://example.org/kg/Marie_Okabe_PERSON", "label": "Marie Okabe", "shape": "dot", "title": "Marie Okabe\nURI: http://example.org/kg/Marie_Okabe_PERSON\nlabel: Marie Okabe"}, {"group": "Place", "id": "http://example.org/kg/Ben_Aknoun_GPE", "label": "Ben Aknoun", "shape": "dot", "title": "Ben Aknoun\nURI: http://example.org/kg/Ben_Aknoun_GPE\nlabel: Ben Aknoun"}, {"group": "Organization", "id": "http://example.org/kg/CNN_ORG", "label": "CNN", "shape": "dot", "title": "CNN\nURI: http://example.org/kg/CNN_ORG\nlabel: CNN"}, {"group": "Organization", "id": "http://example.org/kg/Algeria_Press_Agency_ORG", "label": "Algeria Press Agency", "shape": "dot", "title": "Algeria Press Agency\nURI: http://example.org/kg/Algeria_Press_Agency_ORG\nlabel: Algeria Press Agency"}, {"group": "Organization", "id": "http://example.org/kg/Salafist_Group_for_Preaching_and_Combat_ORG", "label": "Salafist Group for Preaching and Combat", "shape": "dot", "title": "Salafist Group for Preaching and Combat\nURI: http://example.org/kg/Salafist_Group_for_Preaching_and_Combat_ORG\nlabel: Salafist Group for Preaching and Combat"}, {"group": "UnknownType", "id": "http://schema.org/Organization", "label": "Organization", "shape": "dot", "title": "Organization\nURI: http://schema.org/Organization"}, {"group": "Statement", "id": "http://example.org/kg/800_kg_CARDINAL", "label": "800 kg", "shape": "dot", "title": "800 kg\nURI: http://example.org/kg/800_kg_CARDINAL\nlabel: 800 kg"}, {"group": "Statement", "id": "http://example.org/kg/33_million_CARDINAL", "label": "33 million", "shape": "dot", "title": "33 million\nURI: http://example.org/kg/33_million_CARDINAL\nlabel: 33 million"}, {"group": "Person", "id": "http://example.org/kg/Ban_Ki-moon_PERSON", "label": "Ban Ki-moon", "shape": "dot", "title": "Ban Ki-moon\nURI: http://example.org/kg/Ban_Ki-moon_PERSON\nlabel: Ban Ki-moon"}, {"group": "Organization", "id": "http://example.org/kg/United_Nations_ORG", "label": "United Nations", "shape": "dot", "title": "United Nations\nURI: http://example.org/kg/United_Nations_ORG\nlabel: United Nations"}, {"group": "Place", "id": "http://example.org/kg/Geneva_GPE", "label": "Geneva", "shape": "dot", "title": "Geneva\nURI: http://example.org/kg/Geneva_GPE\nlabel: Geneva"}, {"group": "UnknownType", "id": "http://schema.org/Place", "label": "Place", "shape": "dot", "title": "Place\nURI: http://schema.org/Place"}, {"group": "Organization", "id": "http://example.org/kg/UN_High_Commissioner_for_Refugees_ORG", "label": "UN High Commissioner for Refugees", "shape": "dot", "title": "UN High Commissioner for Refugees\nURI: http://example.org/kg/UN_High_Commissioner_for_Refugees_ORG\nlabel: UN High Commissioner for Refugees"}, {"group": "Organization", "id": "http://example.org/kg/GSPC_ORG", "label": "GSPC", "shape": "dot", "title": "GSPC\nURI: http://example.org/kg/GSPC_ORG\nlabel: GSPC"}, {"group": "Person", "id": "http://example.org/kg/Sheikh_Ibrahim_Abu_Othman_PERSON", "label": "Sheikh Ibrahim Abu Othman", "shape": "dot", "title": "Sheikh Ibrahim Abu Othman\nURI: http://example.org/kg/Sheikh_Ibrahim_Abu_Othman_PERSON\nlabel: Sheikh Ibrahim Abu Othman"}, {"group": "Place", "id": "http://example.org/kg/Algeria_GPE", "label": "Algeria", "shape": "dot", "title": "Algeria\nURI: http://example.org/kg/Algeria_GPE\nlabel: Algeria"}, {"group": "Person", "id": "http://example.org/kg/Noureddine_Yazid_Zerhouni_PERSON", "label": "Noureddine Yazid Zerhouni", "shape": "dot", "title": "Noureddine Yazid Zerhouni\nURI: http://example.org/kg/Noureddine_Yazid_Zerhouni_PERSON\nlabel: Noureddine Yazid Zerhouni"}, {"group": "Place", "id": "http://example.org/kg/Algiers_GPE", "label": "Algiers", "shape": "dot", "title": "Algiers\nURI: http://example.org/kg/Algiers_GPE\nlabel: Algiers"}, {"group": "Organization", "id": "http://example.org/kg/al_Qaeda_ORG", "label": "al Qaeda", "shape": "dot", "title": "al Qaeda\nURI: http://example.org/kg/al_Qaeda_ORG\nlabel: al Qaeda"}, {"group": "Person", "id": "http://example.org/kg/Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON", "label": "Abdel Rahman Abu Abdel Nasser al-Asimi", "shape": "dot", "title": "Abdel Rahman Abu Abdel Nasser al-Asimi\nURI: http://example.org/kg/Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON\nlabel: Abdel Rahman Abu Abdel Nasser al-Asimi"}, {"group": "Statement", "id": "http://example.org/kg/1_763_pounds_CARDINAL", "label": "1,763 pounds", "shape": "dot", "title": "1,763 pounds\nURI: http://example.org/kg/1_763_pounds_CARDINAL\nlabel: 1,763 pounds"}, {"group": "Article", "id": "http://example.org/kg/article_82a0e1f034174079179821b052f33df76c781b47", "label": "article_82a0e1f034174079179821b052f33df76c781b47", "shape": "dot", "title": "article_82a0e1f034174079179821b052f33df76c781b47\nURI: http://example.org/kg/article_82a0e1f034174079179821b052f33df76c781b47\nheadline: Thousands of teens attend Christian rallies each year .\nMany of the rallies attempt to offer an alternative to secular popular culture .\nOpponents say these impose conservative values on vulnerable teenagers ."}, {"group": "UnknownType", "id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement", "label": "Statement", "shape": "dot", "title": "Statement\nURI: http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"}, {"group": "Person", "id": "http://example.org/kg/Ron_Redmond_PERSON", "label": "Ron Redmond", "shape": "dot", "title": "Ron Redmond\nURI: http://example.org/kg/Ron_Redmond_PERSON\nlabel: Ron Redmond"}, {"group": "Place", "id": "http://example.org/kg/Morocco_GPE", "label": "Morocco", "shape": "dot", "title": "Morocco\nURI: http://example.org/kg/Morocco_GPE\nlabel: Morocco"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Tunisia_GPE"}, {"arrows": "to", "from": "http://example.org/kg/Paula_Newton_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/article_56d7d67bb0fc32ee71cc006b915244776d883661", "label": "type", "title": "type", "to": "http://schema.org/Article"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Marie_Okabe_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/Marie_Okabe_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/CNN_ORG"}, {"arrows": "to", "from": "http://example.org/kg/Salafist_Group_for_Preaching_and_Combat_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Paula_Newton_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Ban_Ki-moon_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/United_Nations_ORG"}, {"arrows": "to", "from": "http://example.org/kg/Geneva_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/Algeria_Press_Agency_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/UN_High_Commissioner_for_Refugees_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/800_kg_CARDINAL"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "type", "title": "type", "to": "http://schema.org/Article"}, {"arrows": "to", "from": "http://example.org/kg/Sheikh_Ibrahim_Abu_Othman_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/Noureddine_Yazid_Zerhouni_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/Ban_Ki-moon_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/GSPC_ORG"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Algeria_Press_Agency_ORG"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Ben_Aknoun_GPE"}, {"arrows": "to", "from": "http://example.org/kg/al_Qaeda_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/United_Nations_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Algiers_GPE"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/1_763_pounds_CARDINAL"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Algeria_GPE"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Geneva_GPE"}, {"arrows": "to", "from": "http://example.org/kg/1_763_pounds_CARDINAL", "label": "type", "title": "type", "to": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"}, {"arrows": "to", "from": "http://example.org/kg/Algeria_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/33_million_CARDINAL", "label": "type", "title": "type", "to": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"}, {"arrows": "to", "from": "http://example.org/kg/CNN_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/UN_High_Commissioner_for_Refugees_ORG"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/Tunisia_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/GSPC_ORG", "label": "type", "title": "type", "to": "http://schema.org/Organization"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/33_million_CARDINAL"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/al_Qaeda_ORG"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Noureddine_Yazid_Zerhouni_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/article_82a0e1f034174079179821b052f33df76c781b47", "label": "type", "title": "type", "to": "http://schema.org/Article"}, {"arrows": "to", "from": "http://example.org/kg/800_kg_CARDINAL", "label": "type", "title": "type", "to": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"}, {"arrows": "to", "from": "http://example.org/kg/Morocco_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/Ron_Redmond_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Morocco_GPE"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Sheikh_Ibrahim_Abu_Othman_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Ron_Redmond_PERSON"}, {"arrows": "to", "from": "http://example.org/kg/article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a", "label": "mentions", "title": "mentions", "to": "http://example.org/kg/Salafist_Group_for_Preaching_and_Combat_ORG"}, {"arrows": "to", "from": "http://example.org/kg/Algiers_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/Ben_Aknoun_GPE", "label": "type", "title": "type", "to": "http://schema.org/Place"}, {"arrows": "to", "from": "http://example.org/kg/Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON", "label": "type", "title": "type", "to": "http://schema.org/Person"}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"physics": {"forceAtlas2Based": {"gravitationalConstant": -50, "centralGravity": 0.01, "springLength": 100, "springConstant": 0.08, "damping": 0.4, "avoidOverlap": 0.5}, "maxVelocity": 50, "minVelocity": 0.1, "solver": "forceAtlas2Based", "timestep": 0.5, "stabilization": {"iterations": 150}}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

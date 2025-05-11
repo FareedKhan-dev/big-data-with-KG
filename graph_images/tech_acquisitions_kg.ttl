@@ -1,0 +1,113 @@
+@prefix ex: <http://example.org/kg/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema1: <http://schema.org/> .
+
+ex:article_4cf51ce9372dff8ff7f44f098eab1c1d7569af7a a schema1:Article ;
+    schema1:headline """Two bombs explode in Algerian capital near government and U.N. buildings .
+Algeria blames group linked to al Qaeda .
+Official death toll is 26, but some sources say as high as 76 .
+U.N. officials say five of its staff killed and 14 missing .""" ;
+    schema1:mentions ex:1_763_pounds_CARDINAL,
+        ex:33_million_CARDINAL,
+        ex:800_kg_CARDINAL,
+        ex:Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON,
+        ex:Algeria_GPE,
+        ex:Algeria_Press_Agency_ORG,
+        ex:Algiers_GPE,
+        ex:Ban_Ki-moon_PERSON,
+        ex:Ben_Aknoun_GPE,
+        ex:CNN_ORG,
+        ex:GSPC_ORG,
+        ex:Geneva_GPE,
+        ex:Marie_Okabe_PERSON,
+        ex:Morocco_GPE,
+        ex:Noureddine_Yazid_Zerhouni_PERSON,
+        ex:Paula_Newton_PERSON,
+        ex:Ron_Redmond_PERSON,
+        ex:Salafist_Group_for_Preaching_and_Combat_ORG,
+        ex:Sheikh_Ibrahim_Abu_Othman_PERSON,
+        ex:Tunisia_GPE,
+        ex:UN_High_Commissioner_for_Refugees_ORG,
+        ex:United_Nations_ORG,
+        ex:al_Qaeda_ORG .
+
+ex:article_56d7d67bb0fc32ee71cc006b915244776d883661 a schema1:Article ;
+    schema1:headline """Navarrette: Opponents see Hispanic immigrants as weakening U.S. identity .
+One town demanded all library books be in English, Navarrette says .
+Hispanics the latest to find themselves at center of culture war .""" .
+
+ex:article_82a0e1f034174079179821b052f33df76c781b47 a schema1:Article ;
+    schema1:headline """Thousands of teens attend Christian rallies each year .
+Many of the rallies attempt to offer an alternative to secular popular culture .
+Opponents say these impose conservative values on vulnerable teenagers .""" .
+
+ex:1_763_pounds_CARDINAL a rdf:Statement ;
+    rdfs:label "1,763 pounds"@en .
+
+ex:33_million_CARDINAL a rdf:Statement ;
+    rdfs:label "33 million"@en .
+
+ex:800_kg_CARDINAL a rdf:Statement ;
+    rdfs:label "800 kg"@en .
+
+ex:Abdel_Rahman_Abu_Abdel_Nasser_al-Asimi_PERSON a schema1:Person ;
+    rdfs:label "Abdel Rahman Abu Abdel Nasser al-Asimi"@en .
+
+ex:Algeria_GPE a schema1:Place ;
+    rdfs:label "Algeria"@en .
+
+ex:Algeria_Press_Agency_ORG a schema1:Organization ;
+    rdfs:label "Algeria Press Agency"@en .
+
+ex:Algiers_GPE a schema1:Place ;
+    rdfs:label "Algiers"@en .
+
+ex:Ban_Ki-moon_PERSON a schema1:Person ;
+    rdfs:label "Ban Ki-moon"@en .
+
+ex:Ben_Aknoun_GPE a schema1:Place ;
+    rdfs:label "Ben Aknoun"@en .
+
+ex:CNN_ORG a schema1:Organization ;
+    rdfs:label "CNN"@en .
+
+ex:GSPC_ORG a schema1:Organization ;
+    rdfs:label "GSPC"@en .
+
+ex:Geneva_GPE a schema1:Place ;
+    rdfs:label "Geneva"@en .
+
+ex:Marie_Okabe_PERSON a schema1:Person ;
+    rdfs:label "Marie Okabe"@en .
+
+ex:Morocco_GPE a schema1:Place ;
+    rdfs:label "Morocco"@en .
+
+ex:Noureddine_Yazid_Zerhouni_PERSON a schema1:Person ;
+    rdfs:label "Noureddine Yazid Zerhouni"@en .
+
+ex:Paula_Newton_PERSON a schema1:Person ;
+    rdfs:label "Paula Newton"@en .
+
+ex:Ron_Redmond_PERSON a schema1:Person ;
+    rdfs:label "Ron Redmond"@en .
+
+ex:Salafist_Group_for_Preaching_and_Combat_ORG a schema1:Organization ;
+    rdfs:label "Salafist Group for Preaching and Combat"@en .
+
+ex:Sheikh_Ibrahim_Abu_Othman_PERSON a schema1:Person ;
+    rdfs:label "Sheikh Ibrahim Abu Othman"@en .
+
+ex:Tunisia_GPE a schema1:Place ;
+    rdfs:label "Tunisia"@en .
+
+ex:UN_High_Commissioner_for_Refugees_ORG a schema1:Organization ;
+    rdfs:label "UN High Commissioner for Refugees"@en .
+
+ex:United_Nations_ORG a schema1:Organization ;
+    rdfs:label "United Nations"@en .
+
+ex:al_Qaeda_ORG a schema1:Organization ;
+    rdfs:label "al Qaeda"@en .
+
