@@ -1,0 +1,11 @@
+openai
+rdflib
+spacy
+pyvis
+datasets
+scikit-learn
+matplotlib
+tqdm
+pandas
+transformers
+accelerate
